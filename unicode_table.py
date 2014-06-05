@@ -133,13 +133,7 @@ def toAscii(uchars):
   return out.encode('ASCII', 'ignore')
 
 if __name__ == '__main__':
-  teststring1 = u'Jessie J \u2013 Nobody\u2019s Perfect (Netsky Remix).mp3'
-  teststring = u'Nobody\u2019s Perfect (Netsky Remix).mp3'
-  name, ext = os.path.splitext(teststring)
-  print("%r %r" % (name, ext))
-  
-  unewname = toAscii(teststring)
-  artist, title = unewname.split(u' - ')
-  print("%r %r" % (artist, title))
+  print(os.path.join('/test', '', ''))
+  print(os.path.join('/test/', 'sub'))
   
   
