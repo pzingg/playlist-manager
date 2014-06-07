@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="mac-roman"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resource>
   <object class="wxDialog" name="settingsFrame">
     <title>Settings</title>

@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
 import codecs
+import os
 import re
 
 class M3UReader():
   def __init__(self, path):
     self.path = path
-    self.encoding = 'latin-1' # Winamp on PC
+    self.default_encoding = 'latin-1' # Winamp on PC
     self.f = None
     self.m3u = re.compile(r'#EXTM3U')
     self.inf = re.compile(r'#EXTINF:([-]?\d+),(.+)')
@@ -19,7 +20,11 @@ class M3UReader():
   def next(self):
     try:
       if self.f is None:
-        self.f = codecs.open(self.path, 'r', encoding=self.encoding)
+        encoding = self.default_encoding
+        basename, ext = os.path.splitext(self.path)
+        if ext.lower() == '.m3u8':
+          encoding = 'utf-8'
+        self.f = codecs.open(self.path, 'r', encoding=encoding)
         line = self.f.readline().rstrip()
         self.lno += 1
         if not re.match(self.m3u, line):
@@ -46,7 +51,7 @@ class M3UReader():
 class M3UWriter():
   def __init__(self, path):
     self.path = path
-    self.encoding = 'latin-1' # Winamp on PC
+    self.default_encoding = 'latin-1' # Winamp on PC
     self.f = None
     
   def close(self):
@@ -55,7 +60,11 @@ class M3UWriter():
 
   def write(self, path, title, duration):
     if self.f is None:
-      self.f = codecs.open(self.path, 'w', encoding=self.encoding)
+      encoding = self.default_encoding
+      basename, ext = os.path.splitext(self.path)
+      if ext.lower() == '.m3u8':
+        encoding = 'utf-8'
+      self.f = codecs.open(self.path, 'w', encoding=encoding)
       self.f.write(u'#EXTM3U\r\n')
     self.f.write(u'#EXTINF:%d,%s\r\n' % (duration, title))
     self.f.write(u'%s\r\n' % path)

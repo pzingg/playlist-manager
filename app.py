@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import platform
 import sys
 import wx
 from wx import xrc
@@ -12,6 +13,11 @@ MAX_ARTIST = 21
 APPDIR = sys.path[0]
 if os.path.isfile(APPDIR):  #py2exe/py2app
   APPDIR = os.path.dirname(APPDIR)
+  
+SOURCE_WIN = 'C:\\DOCUME~1\\RACHEL~1\\Desktop\\ZML\\Grooves.m3u'
+DEST_WIN   = 'C:\\DOCUME~1\\RACHEL~1\\Desktop\\ZML\\Output'
+SOURCE_MAC = ''
+DEST_MAC   = ''
 
 class SettingsFrame():
   def __init__(self, app, parent):
@@ -30,9 +36,14 @@ class SettingsFrame():
     self.getControl('sourceButton').Bind(wx.EVT_BUTTON, self.onSourceButton)
     self.getControl('destButton').Bind(wx.EVT_BUTTON, self.onDestButton)
     
-    
-    self.getControl('source').SetValue('/Users/pz/Projects/_zml/html5/public/media/audio/by-playlist/lccore/test.txt')
-    self.getControl('dest').SetValue('/Users/pz/Desktop/yrdy')  
+    # todo: store these in a prefs/history file
+    source_file = SOURCE_MAC
+    dest_dir = DEST_MAC
+    if platform.system() == 'Windows':
+    	source_file = SOURCE_WIN
+    	dest_dir = DEST_WIN
+    self.getControl('source').SetValue(source_file)
+    self.getControl('dest').SetValue(dest_dir)  
     self.getControl('treeNo').SetValue(True)
     
   def getControl(self, xmlid):
