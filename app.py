@@ -27,14 +27,17 @@ class SettingsFrame():
     # note: sometimes doing the os.path.join with APPDIR seems to kill xrc.
     #       I have no idea why but try without it if you're having problems.
 
-    self.dlg = dialogxrc.LoadDialog(parent, 'settingsFrame')
+    self.dlg = dialogxrc.LoadDialog(parent, 'dlgSettings')
 
     # Set events and initial control values
+    self.getControl('btnSaveSettings').Bind(wx.EVT_BUTTON, self.onSaveSettings)
+    self.getControl('btnCopy').Bind(wx.EVT_BUTTON, self.onCopy)
+    self.getControl('btnClose').Bind(wx.EVT_BUTTON, self.onClose)
     self.dlg.Bind(wx.EVT_CLOSE, self.onClose)
-    self.getControl('cancelButton').Bind(wx.EVT_BUTTON, self.onClose)
-    self.getControl('copyButton').Bind(wx.EVT_BUTTON, self.onCopy)
-    self.getControl('sourceButton').Bind(wx.EVT_BUTTON, self.onSourceButton)
-    self.getControl('destButton').Bind(wx.EVT_BUTTON, self.onDestButton)
+    
+    self.getControl('btnPlaylistBrowse').Bind(wx.EVT_BUTTON, self.onPlaylistBrowse)
+    self.getControl('btnLibraryBrowse').Bind(wx.EVT_BUTTON, self.onLibraryBrowse)
+    self.getControl('btnDestBrowse').Bind(wx.EVT_BUTTON, self.onDestBrowse)
     
     # todo: store these in a prefs/history file
     source_file = SOURCE_MAC
@@ -42,14 +45,16 @@ class SettingsFrame():
     if platform.system() == 'Windows':
     	source_file = SOURCE_WIN
     	dest_dir = DEST_WIN
-    self.getControl('source').SetValue(source_file)
-    self.getControl('dest').SetValue(dest_dir)  
-    self.getControl('treeNo').SetValue(True)
+    	
+    self.getControl('rbSourcePlaylist').SetValue(True)
+    self.getControl('playlistPath').SetValue(source_file)
+    self.getControl('destPath').SetValue(dest_dir)  
+    self.getControl('rbDestFolder').SetValue(True)
     
   def getControl(self, xmlid):
     '''Retrieves the given control (within a dialog) by its xmlid'''
     control = self.dlg.FindWindowById(xrc.XRCID(xmlid))
-    if control == None and self.dlg.GetMenuBar() != None:  # see if on the menubar
+    if control == None and hasattr(self.dlg, 'GetMenuBar') and self.dlg.GetMenuBar() != None:  # see if on the menubar
       control = self.dlg.GetMenuBar().FindItemById(xrc.XRCID(xmlid))
     assert control != None, 'Programming error: a control with xml id ' + xmlid + ' was not found.'
     return control
@@ -60,8 +65,37 @@ class SettingsFrame():
     dlg.ShowModal() # Show it
     dlg.Destroy() # finally destroy it when finished.
 
+  # todo
+  def onSaveSettings(self, e):
+    pass
+
+  def messageDialog(self, msg):
+    dlg = wx.MessageDialog(self.dlg, msg, "Error", wx.OK|wx.ICON_EXCLAMATION)
+    dlg.ShowModal()
+    dlg.Destroy()
+
+  def onCopy(self, e):
+    dest = self.getControl('destPath').GetValue()
+    if os.path.isdir(dest):
+      copyTree = self.getControl('rbDestTree').GetValue()
+      playlist = self.getControl('rbSourcePlaylist').GetValue()
+      if playlist:
+        source = self.getControl('playlistPath').GetValue()
+        if os.path.isfile(source):
+          self.app.copyPlaylist(source, dest, copyTree)
+        else:
+          self.messageDialog("Playlist file is not valid.")
+      else:
+        source = self.getControl('libraryPath').GetValue()
+        if os.path.isdir(source):
+          self.app.copyLibrary(source, dest, copyTree)
+        else:
+          self.messageDialog("Library folder is not valid.")
+    else:
+      self.messageDialog("Destination folder is not valid.")
+
   def onClose(self, e):
-    confirmDlg = wx.MessageDialog(self.dlg, "Exit the program?", "Exit", wx.YES_NO | wx.ICON_QUESTION)
+    confirmDlg = wx.MessageDialog(self.dlg, "Exit the program?", "Exit", wx.YES_NO|wx.ICON_QUESTION)
     if confirmDlg.ShowModal() == wx.ID_YES:
       self.dlg.Destroy()  # frame
     confirmDlg.Destroy()
@@ -69,25 +103,26 @@ class SettingsFrame():
   def onExit(self, e):
     self.Close(True)  # Close the frame.
     
-  def onCopy(self, e):
-    source = self.getControl('source').GetValue()
-    dest = self.getControl('dest').GetValue()
-    copyTree = self.getControl('treeYes').GetValue()
-    self.app.copyFiles(source, dest, copyTree)
-
-  def onSourceButton(self, event):
+  def onPlaylistBrowse(self, event):
     '''Responds to the 'Browse...' button'''
-    source = self.getControl('source').GetValue()
-    newSource = wx.FileSelector('Please select an m3u file or a file in a directory to start with:', source)
+    source = self.getControl('playlistPath').GetValue()
+    newSource = wx.FileSelector('Please select the m3u playlist file:', source)
     if newSource:
-      self.getControl('source').SetValue(newSource)
+      self.getControl('playlistPath').SetValue(newSource)
     
-  def onDestButton(self, event):
+  def onLibraryBrowse(self, event):
     '''Responds to the 'Browse...' button'''
-    dest = self.getControl('dest').GetValue()
-    newDest = wx.DirSelector('Please select the directory to save to:', dest)
+    source = self.getControl('libraryPath').GetValue()
+    newSource = wx.DirSelector('Please select the audio library folder:', source)
+    if newSource:
+      self.getControl('libraryPath').SetValue(newSource)
+      
+  def onDestBrowse(self, event):
+    '''Responds to the 'Browse...' button'''
+    dest = self.getControl('destPath').GetValue()
+    newDest = wx.DirSelector('Please select the folder to save to:', dest)
     if newDest:
-      self.getControl('dest').SetValue(newDest)
+      self.getControl('destPath').SetValue(newDest)
 
 class PlaylistManagerApp(wx.App):
   '''Main application class'''
@@ -166,16 +201,17 @@ class PlaylistManagerApp(wx.App):
               destPath = os.path.join(dest, rel)
           self.processFile(sourceName, sourcePath, destPath)
 
-  def copyFiles(self, source, dest, copyTree):
+  def copyPlaylist(self, source, dest, copyTree):
     self.contents = ''
     usource = unicode(source)
     udest = unicode(dest)
-    if usource[-4:] == u'.m3u':
-      self.processM3U(usource, udest)
-    else:
-      udir = os.path.dirname(usource)
-      self.processDir(udir, udest, copyTree)
+    self.processM3U(usource, udest)
 
+  def copyLibrary(self, source, dest, copyTree):
+    self.contents = ''
+    usource = unicode(source)
+    udest = unicode(dest)
+    self.processDir(usource, udest, copyTree)
 
 # Startup and handle loop
 app = PlaylistManagerApp()
