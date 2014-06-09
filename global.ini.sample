@@ -1,0 +1,12 @@
+[global]
+last_settings = /Users/pz/Library/Application Support/Playlist Manager/mac.ini
+
+[source]
+type = playlist
+playlist_path = /Users/pz/Projects/_zml/playlist-manager/PZ_test_with_paths.m3u
+library_path = 
+
+[destination]
+copy_method = folder
+dest_path = /Users/pz/Desktop/yrdy
+
