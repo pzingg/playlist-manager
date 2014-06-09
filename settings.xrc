@@ -2,7 +2,7 @@
 <resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">
 	<object class="wxDialog" name="dlgSettings">
 		<style>wxCAPTION|wxCLOSE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU</style>
-		<size>500,200</size>
+		<size>500,400</size>
 		<title>Settings</title>
 		<centered>1</centered>
 		<object class="wxBoxSizer">
@@ -47,77 +47,17 @@
 					</object>
 					<object class="sizeritem">
 						<cellpos>1,0</cellpos>
-						<cellspan>1,4</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxRadioButton" name="rbSourcePlaylist">
-							<style>wxRB_GROUP</style>
-							<label>Copy from an m3u playlist file</label>
-							<value>0</value>
-						</object>
-					</object>
-					<object class="spacer">
-						<cellpos>2,0</cellpos>
-						<cellspan>1,1</cellspan>
-						<flag>wxEXPAND</flag>
-						<border>5</border>
-						<size>20,0</size>
-					</object>
-					<object class="sizeritem">
-						<cellpos>2,1</cellpos>
-						<cellspan>1,1</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxStaticText" name="m_staticText4">
-							<style>wxALIGN_RIGHT</style>
-							<label>m3u playlist file:</label>
-							<wrap>-1</wrap>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>2,2</cellpos>
-						<cellspan>1,1</cellspan>
-						<flag>wxALL|wxEXPAND</flag>
-						<border>5</border>
-						<object class="wxTextCtrl" name="playlistPath">
-							<size>200,-1</size>
-							<value></value>
-							<maxlength>0</maxlength>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>2,3</cellpos>
-						<cellspan>1,1</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="btnPlaylistBrowse">
-							<label>Browse...</label>
-							<default>0</default>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>3,0</cellpos>
-						<cellspan>1,4</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxRadioButton" name="rbSourceFolder">
-							<label>Copy from an audio library (folder)</label>
-							<value>0</value>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>4,1</cellpos>
-						<cellspan>1,1</cellspan>
+						<cellspan>1,2</cellspan>
 						<flag>wxALL</flag>
 						<border>5</border>
 						<object class="wxStaticText" name="m_staticText5">
 							<style>wxALIGN_RIGHT</style>
-							<label>Library folder:</label>
+							<label>Audio library folder:</label>
 							<wrap>-1</wrap>
 						</object>
 					</object>
 					<object class="sizeritem">
-						<cellpos>4,2</cellpos>
+						<cellpos>1,2</cellpos>
 						<cellspan>1,1</cellspan>
 						<flag>wxALL|wxEXPAND</flag>
 						<border>5</border>
@@ -128,11 +68,71 @@
 						</object>
 					</object>
 					<object class="sizeritem">
-						<cellpos>4,3</cellpos>
+						<cellpos>1,3</cellpos>
 						<cellspan>1,1</cellspan>
 						<flag>wxALL</flag>
 						<border>5</border>
 						<object class="wxButton" name="btnLibraryBrowse">
+							<label>Browse...</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<cellpos>2,0</cellpos>
+						<cellspan>1,4</cellspan>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxRadioButton" name="rbSourceLibrary">
+							<label>Copy from the audio library (folder)</label>
+							<value>0</value>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<cellpos>3,0</cellpos>
+						<cellspan>1,4</cellspan>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxRadioButton" name="rbSourcePlaylist">
+							<style>wxRB_GROUP</style>
+							<label>Copy from an m3u playlist file</label>
+							<value>0</value>
+						</object>
+					</object>
+					<object class="spacer">
+						<cellpos>4,0</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxEXPAND</flag>
+						<border>5</border>
+						<size>20,0</size>
+					</object>
+					<object class="sizeritem">
+						<cellpos>4,1</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxStaticText" name="m_staticText4">
+							<style>wxALIGN_RIGHT</style>
+							<label>m3u playlist file:</label>
+							<wrap>-1</wrap>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<cellpos>4,2</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>5</border>
+						<object class="wxTextCtrl" name="playlistPath">
+							<size>200,-1</size>
+							<value></value>
+							<maxlength>0</maxlength>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<cellpos>4,3</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="btnPlaylistBrowse">
 							<label>Browse...</label>
 							<default>0</default>
 						</object>
@@ -149,6 +149,37 @@
 					</object>
 					<object class="sizeritem">
 						<cellpos>6,0</cellpos>
+						<cellspan>1,2</cellspan>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxStaticText" name="m_staticText7">
+							<style>wxALIGN_RIGHT</style>
+							<label>Destination folder:</label>
+							<wrap>-1</wrap>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<cellpos>6,2</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>5</border>
+						<object class="wxTextCtrl" name="destPath">
+							<value></value>
+							<maxlength>0</maxlength>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<cellpos>6,3</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="btnDestBrowse">
+							<label>Browse...</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<cellpos>7,0</cellpos>
 						<cellspan>1,4</cellspan>
 						<flag>wxALL</flag>
 						<border>5</border>
@@ -159,44 +190,13 @@
 						</object>
 					</object>
 					<object class="sizeritem">
-						<cellpos>7,0</cellpos>
+						<cellpos>8,0</cellpos>
 						<cellspan>1,4</cellspan>
 						<flag>wxALL</flag>
 						<border>5</border>
 						<object class="wxRadioButton" name="rbDestTree">
 							<label>Copy folder structure from source</label>
 							<value>0</value>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>8,1</cellpos>
-						<cellspan>1,1</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxStaticText" name="m_staticText7">
-							<style>wxALIGN_RIGHT</style>
-							<label>Destination folder:</label>
-							<wrap>-1</wrap>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>8,2</cellpos>
-						<cellspan>1,1</cellspan>
-						<flag>wxALL|wxEXPAND</flag>
-						<border>5</border>
-						<object class="wxTextCtrl" name="destPath">
-							<value></value>
-							<maxlength>0</maxlength>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>8,3</cellpos>
-						<cellspan>1,1</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="btnDestBrowse">
-							<label>Browse...</label>
-							<default>0</default>
 						</object>
 					</object>
 				</object>

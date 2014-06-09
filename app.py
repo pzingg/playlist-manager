@@ -20,13 +20,32 @@ DEST_WIN   = 'C:\\DOCUME~1\\RACHEL~1\\Desktop\\ZML\\Output'
 SOURCE_MAC = ''
 DEST_MAC   = ''
 
+DEBUG = True
+
+def verifyDirectory(path):
+  if not os.path.isdir(path):
+    try:
+      os.makedirs(path)
+    except:
+      return False
+  return True
+  
+def relativeSubdirectory(base_path, directory):
+  # adds a slash if it's not there
+  base_path = os.path.normcase(os.path.join(os.path.realpath(base_path), ''))
+  directory = os.path.normcase(os.path.join(os.path.realpath(directory), ''))
+  print("checking directory %s startswith %s" % (directory, base_path))
+  if directory.startswith(base_path):
+    rel = directory[len(base_path):]
+    return rel
+  return None
+
 class SettingsFrame():
   def __init__(self, app, parent):
     self.app = app
     
     self.config_dir = wx.StandardPaths.Get().GetUserDataDir()
-    if not os.path.isdir(self.config_dir):
-      os.makedirs(self.config_dir)
+    verifyDirectory(self.config_dir)
     
     dialogxrc = xrc.XmlResource(os.path.join(APP_DIR, 'settings.xrc'))
     # note: sometimes doing the os.path.join with APP_DIR seems to kill xrc.
@@ -74,7 +93,7 @@ class SettingsFrame():
     if source_type == 'playlist':
       self.getControl('rbSourcePlaylist').SetValue(True)
     else:
-      self.getControl('rbSourceFolder').SetValue(True)
+      self.getControl('rbSourceLibrary').SetValue(True)
     playlist_path = parser.get('source', 'playlist_path')
     self.getControl('playlistPath').SetValue(playlist_path)
     library_path = parser.get('source', 'library_path')
@@ -101,7 +120,7 @@ class SettingsFrame():
     parser.set('global', 'last_settings', last_settings)
     parser.add_section('source')
     source_type = 'playlist'
-    if self.getControl('rbSourceFolder').GetValue():
+    if self.getControl('rbSourceLibrary').GetValue():
       source_type = 'library'
     parser.set('source', 'type', source_type)
     parser.set('source', 'playlist_path', self.getControl('playlistPath').GetValue())
@@ -168,18 +187,23 @@ class SettingsFrame():
   def onCopy(self, e):
     dest = self.getControl('destPath').GetValue()
     if os.path.isdir(dest):
-      copyTree = self.getControl('rbDestTree').GetValue()
+      copy_tree = self.getControl('rbDestTree').GetValue()
       playlist = self.getControl('rbSourcePlaylist').GetValue()
+      base_dir = self.getControl('libraryPath').GetValue()
       if playlist:
         source = self.getControl('playlistPath').GetValue()
         if os.path.isfile(source):
-          self.app.copyPlaylist(source, dest, copyTree)
+          if not copy_tree or base_dir == '':
+            base_dir = os.path.dirname(source)
+          if os.path.isdir(base_dir):
+            self.app.copyPlaylist(source, base_dir, dest, copy_tree)
+          else:
+            self.messageDialog("Base folder is not valid.")
         else:
           self.messageDialog("Playlist file is not valid.")
       else:
-        source = self.getControl('libraryPath').GetValue()
-        if os.path.isdir(source):
-          self.app.copyLibrary(source, dest, copyTree)
+        if os.path.isdir(base_dir):
+          self.app.copyFolder(base_dir, dest, copy_tree)
         else:
           self.messageDialog("Library folder is not valid.")
     else:
@@ -203,8 +227,8 @@ class SettingsFrame():
     
   def onLibraryBrowse(self, event):
     '''Responds to the 'Browse...' button'''
-    source = self.getControl('libraryPath').GetValue()
-    newSource = wx.DirSelector('Please select the audio library folder:', source)
+    base_dir = self.getControl('libraryPath').GetValue()
+    newSource = wx.DirSelector('Please select the audio library folder:', base_dir)
     if newSource:
       self.getControl('libraryPath').SetValue(newSource)
       
@@ -235,9 +259,9 @@ class PlaylistManagerApp(wx.App):
     # self.control.SetValue(self.contents)
     
   def normalizeTitle(self, line, maxArtist, maxName):
-    destName = toAscii(line)
+    dest_name = toAscii(line)
     try:
-      artist, title = destName.split(u' - ', 1)
+      artist, title = dest_name.split(u' - ', 1)
       artist_len = len(artist)
       if artist_len > maxArtist:
         artist_len = maxArtist
@@ -246,66 +270,90 @@ class PlaylistManagerApp(wx.App):
       if title_len > maxName - (3 + artist_len):
         title_len = maxName - (3 + artist_len)
         title = title[0:title_len]
-      destName = artist + u' - ' + title
+      dest_name = artist + u' - ' + title
     except:
-      title = destName
+      title = dest_name
       title_len = len(title)
       if title_len > maxName:
         title_len = maxName
         title = title[0:title_len]
-      destName = title
-    return destName
+      dest_name = title
+    return dest_name
 
-  def processFile(self, sourceName, sourceDir, destDir):
-    basename, ext = os.path.splitext(sourceName)
-    destName = self.normalizeTitle(basename, MAX_ARTIST, 45) + ext
-    if destName != sourceName or destDir != sourceDir:
-      self.appendContents("file: %r %r -> %r %r" % (sourceDir, sourceName, destDir, destName))  
-    return destName
+  def processFile(self, source_name, source_dir, base_dir, root_dir, dest_dir, copy_tree):
+    source_dir = os.path.join(base_dir, source_dir)
+    source_path = os.path.join(source_dir, source_name)
+    # check that source file exists
+    if not os.path.isfile(source_path):
+      print("source file %s does not exist" % source_path)
+      if not DEBUG:
+        return None
+    basename, ext = os.path.splitext(source_name)
+    dest_name = self.normalizeTitle(basename, MAX_ARTIST, 45) + ext
+    rel_dir = dest_dir
+    if copy_tree:
+      # check that the file to be copied is in a subdirectory of the library
+      rel_dir = relativeSubdirectory(root_dir, source_dir)
+      if rel_dir is None:
+        print("%s is not a subdirectory of %s" % (source_dir, root_dir))
+        if not DEBUG:
+          return None
+      else:
+        dest_dir = os.path.join(dest_dir, rel_dir)
+    # check that dest dir exists, create if not
+    if not verifyDirectory(dest_dir):
+      print("could not create dest dir %s" % dest_dir)
+      if not DEBUG:
+        return None
+    # copy file
+    dest_path = os.path.join(dest_dir, dest_name)
+    try:
+      shutil.copy2(source_path, dest_path)
+    except:
+      print("could not copy file from %s to %s" % (source_path, dest_path))
+      if not DEBUG:
+        return None
+    self.appendContents("file: %s %s -> %s %s" % (source_dir, source_name, dest_dir, dest_name))  
+    # return updated path for m3u to write
+    if copy_tree:
+      return os.path.join(rel_dir, dest_name)
+    return dest_name
 
-  def processM3U(self, source, destDir):
-    m3u_name = os.path.basename(source)
-    out_fname = os.path.join(destDir, m3u_name)
+  def processPlaylist(self, source, root_dir, dest_dir, copy_tree):
+    base_dir, m3u_name = os.path.split(source)
+    verifyDirectory(dest_dir)
+    out_fname = os.path.join(dest_dir, m3u_name)
     m3u_in = M3UReader(source)
     m3u_out = M3UWriter(out_fname)
     for item in m3u_in:
       i, path, title, duration = item
-      safeTitle = self.normalizeTitle(title, MAX_ARTIST, 49)
-      sourceDir, sourceName = os.path.split(path)
-      destName = self.processFile(sourceName, sourceDir, destDir)
-      m3u_out.write(destName, safeTitle, duration)
+      source_dir, source_name = os.path.split(path)
+      dest_name = self.processFile(source_name, source_dir, base_dir, root_dir, dest_dir, copy_tree)
+      if dest_name:
+        safe_title = self.normalizeTitle(title, MAX_ARTIST, 49)
+        m3u_out.write(dest_name, safe_title, duration)
     m3u_out.close()
 
-  def processDir(self, source, dest, copyTree):
-    self.source = source
-    self.dest = dest
-    destPath = dest
-    sourceLen = len(source) + 1
-    for sourcePath, dirs, files in os.walk(source):
-      for sourceName in files:
+  def processDir(self, source, dest, copy_tree):
+    base_dir = source
+    dest_dir = dest
+    for source_dir, dirs, files in os.walk(source):
+      for source_name in files:
         if ufname[-4:] == u'.mp3':
-          if copyTree:
-            rel = sourcePath[sourceLen:]
-            if rel == u'':
-              destPath = dest
-            else:
-              destPath = os.path.join(dest, rel)
-          self.processFile(sourceName, sourcePath, destPath)
+          self.processFile(source_name, source_dir, base_dir, base_dir, dest_dir, copy_tree)
 
-  def copyPlaylist(self, source, dest, copyTree):
+  def copyPlaylist(self, source, root, dest, copy_tree):
+    self.contents = ''
+    usource = unicode(source)
+    uroot = unicode(root)
+    udest = unicode(dest)
+    self.processPlaylist(usource, uroot, udest, copy_tree)
+
+  def copyFolder(self, source, dest, copy_tree):
     self.contents = ''
     usource = unicode(source)
     udest = unicode(dest)
-    self.processM3U(usource, udest)
-
-  def copyLibrary(self, source, dest, copyTree):
-    self.contents = ''
-    usource = unicode(source)
-    udest = unicode(dest)
-    self.processDir(usource, udest, copyTree)
-    
-
-    
+    self.processDir(usource, udest, copy_tree)
 
 # Startup and handle loop
 app = PlaylistManagerApp()
