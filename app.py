@@ -2,6 +2,7 @@
 
 import os
 import platform
+import shutil
 import sys
 import wx
 from wx import xrc
@@ -33,9 +34,9 @@ def verifyDirectory(path):
 def relativeSubdirectory(base_path, directory):
   # adds a slash if it's not there
   base_path = os.path.normcase(os.path.join(os.path.realpath(base_path), ''))
-  directory = os.path.normcase(os.path.join(os.path.realpath(directory), ''))
-  print("checking directory %s startswith %s" % (directory, base_path))
-  if directory.startswith(base_path):
+  directory = os.path.join(os.path.realpath(directory), '')
+  directory_norm = os.path.normcase(directory)
+  if directory_norm.startswith(base_path):
     rel = directory[len(base_path):]
     return rel
   return None
@@ -310,7 +311,7 @@ class PlaylistManagerApp(wx.App):
     try:
       shutil.copy2(source_path, dest_path)
     except:
-      print("could not copy file from %s to %s" % (source_path, dest_path))
+      print("could not copy file from %s to %s: %s" % (source_path, dest_path, sys.exc_info()[0]))
       if not DEBUG:
         return None
     self.appendContents("file: %s %s -> %s %s" % (source_dir, source_name, dest_dir, dest_name))  
