@@ -1,247 +1,1 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">
-	<object class="wxDialog" name="dlgSettings">
-		<style>wxCAPTION|wxCLOSE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU</style>
-		<size>500,400</size>
-		<title>Settings</title>
-		<centered>1</centered>
-		<object class="wxBoxSizer">
-			<orient>wxVERTICAL</orient>
-			<object class="sizeritem">
-				<option>0</option>
-				<flag>wxALL|wxEXPAND</flag>
-				<border>5</border>
-				<object class="wxStaticText" name="lastOp">
-					<label>No prior operation</label>
-					<wrap>-1</wrap>
-				</object>
-			</object>
-			<object class="sizeritem">
-				<option>0</option>
-				<flag>wxALL|wxEXPAND</flag>
-				<border>5</border>
-				<object class="wxStaticText" name="status">
-					<label>Ready</label>
-					<wrap>-1</wrap>
-				</object>
-			</object>
-			<object class="sizeritem">
-				<option>1</option>
-				<flag>wxEXPAND</flag>
-				<border>5</border>
-				<object class="wxGridBagSizer">
-					<vgap>0</vgap>
-					<hgap>0</hgap>
-					<growablecols>2</growablecols>
-					<growablerows></growablerows>
-					<object class="sizeritem">
-						<cellpos>0,0</cellpos>
-						<cellspan>1,4</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxStaticText" name="m_staticText3">
-							<pos>0,0</pos>
-							<label>Source Options</label>
-							<wrap>-1</wrap>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>1,0</cellpos>
-						<cellspan>1,2</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxStaticText" name="m_staticText5">
-							<style>wxALIGN_RIGHT</style>
-							<label>Audio library folder:</label>
-							<wrap>-1</wrap>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>1,2</cellpos>
-						<cellspan>1,1</cellspan>
-						<flag>wxALL|wxEXPAND</flag>
-						<border>5</border>
-						<object class="wxTextCtrl" name="libraryPath">
-							<size>200,-1</size>
-							<value></value>
-							<maxlength>0</maxlength>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>1,3</cellpos>
-						<cellspan>1,1</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="btnLibraryBrowse">
-							<label>Browse...</label>
-							<default>0</default>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>2,0</cellpos>
-						<cellspan>1,4</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxRadioButton" name="rbSourceLibrary">
-							<label>Copy from the audio library (folder)</label>
-							<value>0</value>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>3,0</cellpos>
-						<cellspan>1,4</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxRadioButton" name="rbSourcePlaylist">
-							<style>wxRB_GROUP</style>
-							<label>Copy from an m3u playlist file</label>
-							<value>0</value>
-						</object>
-					</object>
-					<object class="spacer">
-						<cellpos>4,0</cellpos>
-						<cellspan>1,1</cellspan>
-						<flag>wxEXPAND</flag>
-						<border>5</border>
-						<size>20,0</size>
-					</object>
-					<object class="sizeritem">
-						<cellpos>4,1</cellpos>
-						<cellspan>1,1</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxStaticText" name="m_staticText4">
-							<style>wxALIGN_RIGHT</style>
-							<label>m3u playlist file:</label>
-							<wrap>-1</wrap>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>4,2</cellpos>
-						<cellspan>1,1</cellspan>
-						<flag>wxALL|wxEXPAND</flag>
-						<border>5</border>
-						<object class="wxTextCtrl" name="playlistPath">
-							<size>200,-1</size>
-							<value></value>
-							<maxlength>0</maxlength>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>4,3</cellpos>
-						<cellspan>1,1</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="btnPlaylistBrowse">
-							<label>Browse...</label>
-							<default>0</default>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>5,0</cellpos>
-						<cellspan>1,4</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxStaticText" name="m_staticText6">
-							<label>Destination Options</label>
-							<wrap>-1</wrap>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>6,0</cellpos>
-						<cellspan>1,2</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxStaticText" name="m_staticText7">
-							<style>wxALIGN_RIGHT</style>
-							<label>Destination folder:</label>
-							<wrap>-1</wrap>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>6,2</cellpos>
-						<cellspan>1,1</cellspan>
-						<flag>wxALL|wxEXPAND</flag>
-						<border>5</border>
-						<object class="wxTextCtrl" name="destPath">
-							<value></value>
-							<maxlength>0</maxlength>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>6,3</cellpos>
-						<cellspan>1,1</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="btnDestBrowse">
-							<label>Browse...</label>
-							<default>0</default>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>7,0</cellpos>
-						<cellspan>1,4</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxRadioButton" name="rbDestFolder">
-							<style>wxRB_GROUP</style>
-							<label>Copy into a single folder</label>
-							<value>0</value>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<cellpos>8,0</cellpos>
-						<cellspan>1,4</cellspan>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxRadioButton" name="rbDestTree">
-							<label>Copy folder structure from source</label>
-							<value>0</value>
-						</object>
-					</object>
-				</object>
-			</object>
-			<object class="sizeritem">
-				<option>1</option>
-				<flag>wxEXPAND</flag>
-				<border>5</border>
-				<object class="wxBoxSizer">
-					<orient>wxHORIZONTAL</orient>
-					<object class="spacer">
-						<option>1</option>
-						<flag>wxEXPAND</flag>
-						<border>5</border>
-						<size>0,0</size>
-					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALIGN_RIGHT|wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="btnSaveSettings">
-							<label>Save Settings As...</label>
-							<default>0</default>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALIGN_RIGHT|wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="btnCopy">
-							<label>Start Copy</label>
-							<default>0</default>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALIGN_RIGHT|wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="btnClose">
-							<label>Close</label>
-							<default>0</default>
-						</object>
-					</object>
-				</object>
-			</object>
-		</object>
-	</object>
-</resource>
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?><resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">	<object class="wxDialog" name="dlgSettings">		<style>wxCAPTION|wxCLOSE_BOX|wxRESIZE_BORDER|wxSYSTEM_MENU</style>		<size>-1,-1</size>		<title>Settings</title>		<centered>1</centered>		<object class="wxBoxSizer">			<orient>wxVERTICAL</orient>			<object class="sizeritem">				<option>0</option>				<flag>wxALL|wxEXPAND</flag>				<border>5</border>				<object class="wxStaticText" name="lastOp">					<label>No prior operation</label>					<wrap>-1</wrap>				</object>			</object>			<object class="sizeritem">				<option>0</option>				<flag>wxALL|wxEXPAND</flag>				<border>5</border>				<object class="wxStaticText" name="status">					<label>Ready</label>					<wrap>-1</wrap>				</object>			</object>			<object class="sizeritem">				<option>1</option>				<flag>wxEXPAND</flag>				<border>5</border>				<object class="wxGridBagSizer">					<vgap>0</vgap>					<hgap>0</hgap>					<growablecols>2</growablecols>					<growablerows></growablerows>					<object class="sizeritem">						<cellpos>0,0</cellpos>						<cellspan>1,4</cellspan>						<flag>wxALL</flag>						<border>5</border>						<object class="wxStaticText" name="m_staticText3">							<pos>0,0</pos>							<label>Source Options</label>							<wrap>-1</wrap>						</object>					</object>					<object class="sizeritem">						<cellpos>1,0</cellpos>						<cellspan>1,2</cellspan>						<flag>wxALIGN_RIGHT|wxALL</flag>						<border>5</border>						<object class="wxStaticText" name="m_staticText5">							<style>wxALIGN_RIGHT</style>							<label>Audio library folder:</label>							<wrap>-1</wrap>						</object>					</object>					<object class="sizeritem">						<cellpos>1,2</cellpos>						<cellspan>1,1</cellspan>						<flag>wxALL|wxEXPAND</flag>						<border>5</border>						<object class="wxTextCtrl" name="libraryPath">							<size>200,-1</size>							<value></value>							<maxlength>0</maxlength>						</object>					</object>					<object class="sizeritem">						<cellpos>1,3</cellpos>						<cellspan>1,1</cellspan>						<flag>wxALL</flag>						<border>5</border>						<object class="wxButton" name="btnLibraryBrowse">							<label>Browse...</label>							<default>0</default>						</object>					</object>					<object class="sizeritem">						<cellpos>2,0</cellpos>						<cellspan>1,4</cellspan>						<flag>wxALL</flag>						<border>5</border>						<object class="wxRadioButton" name="rbSourceLibrary">							<label>Copy from the audio library (folder)</label>							<value>0</value>						</object>					</object>					<object class="sizeritem">						<cellpos>3,0</cellpos>						<cellspan>1,4</cellspan>						<flag>wxALL</flag>						<border>5</border>						<object class="wxRadioButton" name="rbSourcePlaylist">							<style>wxRB_GROUP</style>							<label>Copy from an m3u playlist file</label>							<value>0</value>						</object>					</object>					<object class="spacer">						<cellpos>4,0</cellpos>						<cellspan>1,1</cellspan>						<flag>wxEXPAND</flag>						<border>5</border>						<size>20,0</size>					</object>					<object class="sizeritem">						<cellpos>4,1</cellpos>						<cellspan>1,1</cellspan>						<flag>wxALIGN_RIGHT|wxALL</flag>						<border>5</border>						<object class="wxStaticText" name="m_staticText4">							<style>wxALIGN_RIGHT</style>							<label>m3u playlist file:</label>							<wrap>-1</wrap>						</object>					</object>					<object class="sizeritem">						<cellpos>4,2</cellpos>						<cellspan>1,1</cellspan>						<flag>wxALL|wxEXPAND</flag>						<border>5</border>						<object class="wxTextCtrl" name="playlistPath">							<size>200,-1</size>							<value></value>							<maxlength>0</maxlength>						</object>					</object>					<object class="sizeritem">						<cellpos>4,3</cellpos>						<cellspan>1,1</cellspan>						<flag>wxALL</flag>						<border>5</border>						<object class="wxButton" name="btnPlaylistBrowse">							<label>Browse...</label>							<default>0</default>						</object>					</object>					<object class="sizeritem">						<cellpos>5,0</cellpos>						<cellspan>1,4</cellspan>						<flag>wxALL</flag>						<border>5</border>						<object class="wxStaticText" name="m_staticText6">							<label>Destination Options</label>							<wrap>-1</wrap>						</object>					</object>					<object class="sizeritem">						<cellpos>6,0</cellpos>						<cellspan>1,2</cellspan>						<flag>wxALIGN_RIGHT|wxALL</flag>						<border>5</border>						<object class="wxStaticText" name="m_staticText7">							<style>wxALIGN_RIGHT</style>							<label>Destination folder:</label>							<wrap>-1</wrap>						</object>					</object>					<object class="sizeritem">						<cellpos>6,2</cellpos>						<cellspan>1,1</cellspan>						<flag>wxALL|wxEXPAND</flag>						<border>5</border>						<object class="wxTextCtrl" name="destPath">							<value></value>							<maxlength>0</maxlength>						</object>					</object>					<object class="sizeritem">						<cellpos>6,3</cellpos>						<cellspan>1,1</cellspan>						<flag>wxALL</flag>						<border>5</border>						<object class="wxButton" name="btnDestBrowse">							<label>Browse...</label>							<default>0</default>						</object>					</object>					<object class="sizeritem">						<cellpos>7,0</cellpos>						<cellspan>1,4</cellspan>						<flag>wxALL</flag>						<border>5</border>						<object class="wxRadioButton" name="rbDestFolder">							<style>wxRB_GROUP</style>							<label>Copy into a single folder with playlist.m3u and contentupdate.saf</label>							<value>0</value>						</object>					</object>					<object class="sizeritem">						<cellpos>8,0</cellpos>						<cellspan>1,4</cellspan>						<flag>wxALL</flag>						<border>5</border>						<object class="wxRadioButton" name="rbDestTree">							<label>Copy folder structure from source</label>							<value>0</value>						</object>					</object>					<object class="sizeritem">						<cellpos>9,0</cellpos>						<cellspan>1,4</cellspan>						<flag>wxALL</flag>						<border>5</border>						<object class="wxStaticText" name="m_staticText8">							<label>Upload Options</label>							<wrap>-1</wrap>						</object>					</object>					<object class="sizeritem">						<cellpos>10,0</cellpos>						<cellspan>1,2</cellspan>						<flag>wxALIGN_RIGHT|wxALL</flag>						<border>5</border>						<object class="wxStaticText" name="m_staticText9">							<style>wxALIGN_RIGHT</style>							<label>Base upload URL:</label>							<wrap>-1</wrap>						</object>					</object>					<object class="sizeritem">						<cellpos>10,2</cellpos>						<cellspan>1,3</cellspan>						<flag>wxALL|wxEXPAND</flag>						<border>5</border>						<object class="wxTextCtrl" name="uploadBase">							<value></value>							<maxlength>0</maxlength>						</object>					</object>					<object class="sizeritem">						<cellpos>11,0</cellpos>						<cellspan>1,2</cellspan>						<flag>wxALIGN_RIGHT|wxALL</flag>						<border>5</border>						<object class="wxStaticText" name="m_staticText10">							<style>wxALIGN_RIGHT</style>							<label>Upload folder name:</label>							<wrap>-1</wrap>						</object>					</object>					<object class="sizeritem">						<cellpos>11,2</cellpos>						<cellspan>1,1</cellspan>						<flag>wxALL|wxEXPAND</flag>						<border>5</border>						<object class="wxTextCtrl" name="uploadFolder">							<value></value>							<maxlength>0</maxlength>						</object>					</object>				</object>			</object>			<object class="sizeritem">				<option>1</option>				<flag>wxEXPAND</flag>				<border>5</border>				<object class="wxBoxSizer">					<orient>wxHORIZONTAL</orient>					<object class="spacer">						<option>1</option>						<flag>wxEXPAND</flag>						<border>5</border>						<size>0,0</size>					</object>					<object class="sizeritem">						<option>0</option>						<flag>wxALIGN_RIGHT|wxALL</flag>						<border>5</border>						<object class="wxButton" name="btnSaveSettings">							<label>Save Settings As...</label>							<default>0</default>						</object>					</object>					<object class="sizeritem">						<option>0</option>						<flag>wxALIGN_RIGHT|wxALL</flag>						<border>5</border>						<object class="wxButton" name="btnCopy">							<label>Start Copy</label>							<default>0</default>						</object>					</object>					<object class="sizeritem">						<option>0</option>						<flag>wxALIGN_RIGHT|wxALL</flag>						<border>5</border>						<object class="wxButton" name="btnClose">							<label>Close</label>							<default>0</default>						</object>					</object>				</object>			</object>		</object>	</object></resource>

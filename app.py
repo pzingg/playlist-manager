@@ -21,6 +21,7 @@ SOURCE_WIN = 'C:\\DOCUME~1\\RACHEL~1\\Desktop\\ZML\\Grooves.m3u'
 DEST_WIN   = 'C:\\DOCUME~1\\RACHEL~1\\Desktop\\ZML\\Output'
 SOURCE_MAC = ''
 DEST_MAC   = ''
+AUDIO_URL  = 'http://example.com/playlists'
 
 DEBUG = True
 
@@ -76,6 +77,7 @@ class SettingsFrame():
     self.getControl('playlistPath').SetValue(source_file)
     self.getControl('destPath').SetValue(dest_dir)  
     self.getControl('rbDestFolder').SetValue(True)
+    self.getControl('uploadBase').SetValue(AUDIO_URL)
     self.readSettings('global.ini')
     
   def readSettings(self, fname):
@@ -88,7 +90,7 @@ class SettingsFrame():
     
     parser = SafeConfigParser()
     parser.read(fpath)
-    if not (parser.has_section('source') and parser.has_section('destination')):
+    if not (parser.has_section('source') and parser.has_section('destination') and parser.has_section('upload')):
       return False
       
     source_type = parser.get('source', 'type')
@@ -107,6 +109,10 @@ class SettingsFrame():
       self.getControl('rbDestFolder').SetValue(True)
     dest_path = parser.get('destination', 'dest_path')
     self.getControl('destPath').SetValue(dest_path)
+    upload_base = parser.get('upload', 'base_url')
+    self.getControl('uploadBase').SetValue(upload_base)
+    upload_folder = parser.get('upload', 'folder')
+    self.getControl('uploadFolder').SetValue(upload_folder)
 
     try:
       self.last_settings = parser.get('global', 'last_settings')
@@ -133,6 +139,8 @@ class SettingsFrame():
       copy_method = 'tree'
     parser.set('destination', 'copy_method', copy_method)
     parser.set('destination', 'dest_path', self.getControl('destPath').GetValue())
+    parser.set('upload', 'base_url', self.getControl('uploadBase').GetValue())
+    parser.get('upload', 'folder', self.getControl('uploadFolder').GetValue())
     parser.write(f)
     return True
   
@@ -198,7 +206,12 @@ class SettingsFrame():
           if not copy_tree or base_dir == '':
             base_dir = os.path.dirname(source)
           if os.path.isdir(base_dir):
-            self.app.copyPlaylist(source, base_dir, dest, copy_tree)
+            upload_base = self.getControl('uploadBase').GetValue()
+            if upload_base[-1:] != '/':
+              upload_base += '/'
+            upload_folder = self.getControl('uploadFolder').GetValue()
+            audio_url = upload_base + upload_folder
+            self.app.copyPlaylist(source, base_dir, dest, copy_tree, audio_url)
           else:
             self.messageDialog("Base folder is not valid.")
         else:
@@ -248,7 +261,6 @@ class PlaylistManagerApp(wx.App):
     self.contents = ''
     self.m3u_name = 'playlist.m3u'
     self.saf_name = 'contentupdate.saf'
-    self.audio_url = 'http://example.com/playlists'
 
   def OnInit(self):
     '''Sets everything up'''
@@ -324,7 +336,7 @@ class PlaylistManagerApp(wx.App):
       return os.path.join(rel_dir, dest_name)
     return dest_name
 
-  def processPlaylist(self, source, root_dir, dest_dir, copy_tree):
+  def processPlaylist(self, source, root_dir, dest_dir, copy_tree, audio_url):
     base_dir, m3u_name = os.path.split(source)
     verifyDirectory(dest_dir)
     out_fname = os.path.join(dest_dir, self.m3u_name)
@@ -333,7 +345,7 @@ class PlaylistManagerApp(wx.App):
     saf_out = None
     if not copy_tree:
       saf_fname = os.path.join(dest_dir, self.saf_name)
-      saf_out = SafWriter(saf_fname, self.audio_url)
+      saf_out = SafWriter(saf_fname, audio_url)
     for item in m3u_in:
       i, path, title, duration = item
       source_dir, source_name = os.path.split(path)
@@ -356,7 +368,7 @@ class PlaylistManagerApp(wx.App):
         if ufname[-4:] == u'.mp3':
           self.processFile(source_name, source_dir, base_dir, base_dir, dest_dir, copy_tree)
 
-  def copyPlaylist(self, source, root, dest, copy_tree):
+  def copyPlaylist(self, source, root, dest, copy_tree, audio_url):
     self.contents = ''
     usource = unicode(source)
     uroot = unicode(root)
