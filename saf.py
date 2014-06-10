@@ -12,7 +12,7 @@ class SafWriter():
     
   def close(self):
     if self.f:
-      self.f.write("NumberOfEntries=%d\r\n\r\n" % self.n)
+      self.f.write("NumberOfEntries=%d\r\n" % self.n)
       self.f.write("Version=2\r\n\r\n")
       self.f.write("<1.mtd>\r\n")
       self.f.write("url=%s\r\n\r\n" % self.audio_url)
