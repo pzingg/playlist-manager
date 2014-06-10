@@ -27,7 +27,11 @@ Uploading files to production server
 ------------------------------------
 
 Will experiment with fabric, python-based library that can use SSH and
-rysnc to copy files.
+rysnc to copy files. On Windows, you should be able to install fabric
+using ActiveState's pypm tool. Also, pre-built pycrypto modules can be 
+installed.
 
 - http://www.fabfile.org/index.html
 - https://github.com/fabric/fabric
+- http://docs.fabfile.org/en/1.4.0/installation.html
+- http://www.voidspace.org.uk/python/modules.shtml#pycrypto
