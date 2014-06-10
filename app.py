@@ -133,12 +133,15 @@ class SettingsFrame():
     parser.set('source', 'type', source_type)
     parser.set('source', 'playlist_path', self.getControl('playlistPath').GetValue())
     parser.set('source', 'library_path', self.getControl('libraryPath').GetValue())
+    
     parser.add_section('destination')
     copy_method = 'folder'
     if self.getControl('rbDestTree').GetValue():
       copy_method = 'tree'
     parser.set('destination', 'copy_method', copy_method)
     parser.set('destination', 'dest_path', self.getControl('destPath').GetValue())
+    
+    parse.add_section('upload')
     parser.set('upload', 'base_url', self.getControl('uploadBase').GetValue())
     parser.get('upload', 'folder', self.getControl('uploadFolder').GetValue())
     parser.write(f)
