@@ -23,8 +23,6 @@ SOURCE_MAC = ''
 DEST_MAC   = ''
 AUDIO_URL  = 'http://example.com/playlists'
 
-DEBUG = True
-
 def verifyDirectory(path):
   if not os.path.isdir(path):
     try:
@@ -42,13 +40,25 @@ def relativeSubdirectory(base_path, directory):
     rel = directory[len(base_path):]
     return rel
   return None
+  
+def getConfigOption(parser, section, option, default_value=None, opt_type=None):
+  value = default_value
+  try:
+    if opt_type == 'bool':
+      value = parser.getboolean(section, option)
+    elif opt_type == 'int':
+      value = parser.getint(section, option)
+    elif opt_type == 'float':
+      value = parser.getfloat(section, option)
+    else:
+      value = parser.get(section, option)
+  except:
+    pass
+  return value
 
 class SettingsFrame():
   def __init__(self, app, parent):
     self.app = app
-    
-    self.config_dir = wx.StandardPaths.Get().GetUserDataDir()
-    verifyDirectory(self.config_dir)
     
     dialogxrc = xrc.XmlResource(os.path.join(APP_DIR, 'settings.xrc'))
     # note: sometimes doing the os.path.join with APP_DIR seems to kill xrc.
@@ -78,21 +88,8 @@ class SettingsFrame():
     self.getControl('destPath').SetValue(dest_dir)  
     self.getControl('rbDestFolder').SetValue(True)
     self.getControl('uploadBase').SetValue(AUDIO_URL)
-    self.readSettings('global.ini')
     
-  def readSettings(self, fname):
-    fpath = os.path.join(self.config_dir, fname)
-    if not os.path.exists(fpath):
-      fpath = os.path.join(APP_DIR, fname)
-      if not os.path.exists(fpath):
-        print("no %s settings file found" % fname)
-        return False
-    
-    parser = SafeConfigParser()
-    parser.read(fpath)
-    if not (parser.has_section('source') and parser.has_section('destination') and parser.has_section('upload')):
-      return False
-      
+  def loadSettings(self, parser):
     source_type = parser.get('source', 'type')
     if source_type == 'playlist':
       self.getControl('rbSourcePlaylist').SetValue(True)
@@ -113,19 +110,9 @@ class SettingsFrame():
     self.getControl('uploadBase').SetValue(upload_base)
     upload_folder = parser.get('upload', 'folder')
     self.getControl('uploadFolder').SetValue(upload_folder)
-
-    try:
-      self.last_settings = parser.get('global', 'last_settings')
-    except:
-      self.last_settings = None
-
-    print("settings loaded from %s" % fname)
     return True
 
-  def saveSettings_(self, f, last_settings):
-    parser = SafeConfigParser()
-    parser.add_section('global')
-    parser.set('global', 'last_settings', last_settings)
+  def saveSettings(self, parser):
     parser.add_section('source')
     source_type = 'playlist'
     if self.getControl('rbSourceLibrary').GetValue():
@@ -144,32 +131,8 @@ class SettingsFrame():
     parse.add_section('upload')
     parser.set('upload', 'base_url', self.getControl('uploadBase').GetValue())
     parser.get('upload', 'folder', self.getControl('uploadFolder').GetValue())
-    parser.write(f)
     return True
   
-  def saveSettingsGlobal(self, last_settings):
-    fname = os.path.join(APP_DIR, 'global.ini')
-    print("global settings file %s" % fname)
-    f = open(fname, 'w')
-    if not f:
-      return False
-    did_save = self.saveSettings_(f, last_settings)
-    f.close()
-    return did_save
-    
-  def saveSettings(self, fname):
-    fname = os.path.realpath(os.path.join(self.config_dir, fname))
-    print("user settings file %s" % fname)
-    f = open(fname, 'w')
-    if not f:
-      return False
-    did_save = self.saveSettings_(f, fname)
-    f.close()
-    if not did_save:
-      return False
-    self.last_settings = fname
-    return self.saveSettingsGlobal(fname)
-    
   def getControl(self, xmlid):
     '''Retrieves the given control (within a dialog) by its xmlid'''
     control = self.dlg.FindWindowById(xrc.XRCID(xmlid))
@@ -190,7 +153,7 @@ class SettingsFrame():
       default_filename='global.ini', default_path=self.config_dir, 
       wildcard="INI files (*.ini)|*.ini", flags=wx.FD_SAVE)
     if fname:
-      self.saveSettings(fname)
+      self.app.saveSettings(fname)
 
   def messageDialog(self, msg):
     dlg = wx.MessageDialog(self.dlg, msg, "Error", wx.OK|wx.ICON_EXCLAMATION)
@@ -261,15 +224,20 @@ class PlaylistManagerApp(wx.App):
   '''Main application class'''
   def __init__(self):
     wx.App.__init__(self)
+    self.debug = False
     self.contents = ''
     self.m3u_name = 'playlist.m3u'
     self.saf_name = 'contentupdate.saf'
 
   def OnInit(self):
     '''Sets everything up'''
+    self.config_dir = wx.StandardPaths.Get().GetUserDataDir()
+    verifyDirectory(self.config_dir)
+    
     # set up the main frame of the app
     self.SetAppName('Playlist Manager')
     self.settingsFrame = SettingsFrame(self, None)
+    self.loadSettings('global.ini')
     self.settingsFrame.dlg.Show(True)
     return True
 
@@ -306,7 +274,7 @@ class PlaylistManagerApp(wx.App):
     # check that source file exists
     if not os.path.isfile(source_path):
       print("source file %s does not exist" % source_path)
-      if not DEBUG:
+      if not self.debug:
         return None
     basename, ext = os.path.splitext(source_name)
     dest_name = self.normalizeTitle(basename, MAX_ARTIST, 45) + ext
@@ -316,14 +284,14 @@ class PlaylistManagerApp(wx.App):
       rel_dir = relativeSubdirectory(root_dir, source_dir)
       if rel_dir is None:
         print("%s is not a subdirectory of %s" % (source_dir, root_dir))
-        if not DEBUG:
+        if not self.debug:
           return None
       else:
         dest_dir = os.path.join(dest_dir, rel_dir)
     # check that dest dir exists, create if not
     if not verifyDirectory(dest_dir):
       print("could not create dest dir %s" % dest_dir)
-      if not DEBUG:
+      if not self.debug:
         return None
     # copy file
     dest_path = os.path.join(dest_dir, dest_name)
@@ -331,7 +299,7 @@ class PlaylistManagerApp(wx.App):
       shutil.copy2(source_path, dest_path)
     except:
       print("could not copy file from %s to %s: %s" % (source_path, dest_path, sys.exc_info()[0]))
-      if not DEBUG:
+      if not self.debug:
         return None
     self.appendContents("file: %s %s -> %s %s" % (source_dir, source_name, dest_dir, dest_name))  
     # return updated path for m3u to write
@@ -376,13 +344,62 @@ class PlaylistManagerApp(wx.App):
     usource = unicode(source)
     uroot = unicode(root)
     udest = unicode(dest)
-    self.processPlaylist(usource, uroot, udest, copy_tree)
+    self.processPlaylist(usource, uroot, udest, copy_tree, audio_url)
 
   def copyFolder(self, source, dest, copy_tree):
     self.contents = ''
     usource = unicode(source)
     udest = unicode(dest)
     self.processDir(usource, udest, copy_tree)
+    
+  def loadSettings(self, fname):
+    fpath = os.path.join(self.config_dir, fname)
+    if not os.path.exists(fpath):
+      fpath = os.path.join(APP_DIR, fname)
+      if not os.path.exists(fpath):
+        print("no %s settings file found" % fname)
+        return False
+
+    parser = SafeConfigParser()
+    parser.read(fpath)
+    if not all([parser.has_section(s) for s in ['global', 'source', 'destination', 'upload']]):
+      print("incomplete config file %s" % fpath)
+      return False
+
+    did_load = self.settingsFrame.loadSettings(parser)
+    self.last_settings = getConfigOption(parser, 'global', 'last_settings')
+    self.debug = getConfigOption(parser, 'global', 'debug', False, 'bool')
+    print("settings loaded from %s" % fpath)
+    print("last_settings %r" % self.last_settings)
+    print("debug %r, a %s" % (self.debug, type(self.debug)))
+    return did_load
+        
+  def saveSettings(self, fname, global_ini=False):
+    f = None
+    if global_ini:
+      global_fname = os.path.join(APP_DIR, 'global.ini')
+      print("global settings file %s" % global_fname)
+      f = fopen(global_fname, 'w')
+    else:
+      fname = os.path.realpath(os.path.join(self.config_dir, fname))
+      print("user settings file %s" % fname)
+      f = open(fname, 'w')
+    if not f:
+      return False
+    parser = SafeConfigParser()
+    parser.add_section('global')
+    parser.set('global', 'debug', self.debug)
+    parser.set('global', 'last_settings', fname)
+    did_save = self.settingsFrame.saveSettings(f, parser)
+    parser.write(f)
+    f.close()
+    if not did_save:
+      return False
+    if not global_ini:
+      self.last_settings = fname
+      # recursive call
+      return self.saveSettings(fname, True)
+    return True
 
 # Startup and handle loop
 app = PlaylistManagerApp()

@@ -1,12 +1,17 @@
 [global]
 last_settings = /Users/pz/Library/Application Support/Playlist Manager/mac.ini
+debug = True
 
 [source]
 type = playlist
-playlist_path = /Users/pz/Projects/_zml/playlist-manager/PZ_test_with_paths.m3u
-library_path = 
+playlist_path = /Users/pz/Projects/_zml/playlist-manager/PZ_test_with_mac_abs_paths.m3u
+library_path = /Users/pz/Music/ZML Audio Files
 
 [destination]
-copy_method = folder
+copy_method = tree
 dest_path = /Users/pz/Desktop/yrdy
+
+[upload]
+base_url = http://zinggmusiclab.com/Playlists
+folder = NewTunes
 
