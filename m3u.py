@@ -9,6 +9,7 @@ class M3UReader():
     self.path = path
     self.default_encoding = 'latin-1' # Winamp on PC
     self.f = None
+    self.eof = False
     self.m3u = re.compile(r'#EXTM3U')
     self.inf = re.compile(r'#EXTINF:([-]?\d+),(.+)')
     self.lno = 0
@@ -17,7 +18,14 @@ class M3UReader():
   def __iter__(self):
     return self
     
+  def close(self):
+    if self.f:
+      self.f.close()
+      self.f = None
+    
   def next(self):
+    if self.eof:
+      raise StopIteration
     try:
       if self.f is None:
         encoding = self.default_encoding
@@ -45,7 +53,7 @@ class M3UReader():
       self.i += 1
       return (self.i, path, title, duration)
     except:
-      self.f.close()
+      self.eof = True
       raise
       
 class M3UWriter():
@@ -57,6 +65,7 @@ class M3UWriter():
   def close(self):
     if self.f:
       self.f.close()
+      self.f = None
 
   def write(self, path, title, duration):
     if self.f is None:

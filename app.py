@@ -8,6 +8,7 @@ import wx
 from wx import xrc
 from unicode_table import toAscii
 from m3u import M3UReader, M3UWriter
+from saf import SafWriter
 from ConfigParser import SafeConfigParser
 
 MAX_ARTIST = 21
@@ -245,6 +246,9 @@ class PlaylistManagerApp(wx.App):
   def __init__(self):
     wx.App.__init__(self)
     self.contents = ''
+    self.m3u_name = 'playlist.m3u'
+    self.saf_name = 'contentupdate.saf'
+    self.audio_url = 'http://example.com/playlists'
 
   def OnInit(self):
     '''Sets everything up'''
@@ -323,9 +327,13 @@ class PlaylistManagerApp(wx.App):
   def processPlaylist(self, source, root_dir, dest_dir, copy_tree):
     base_dir, m3u_name = os.path.split(source)
     verifyDirectory(dest_dir)
-    out_fname = os.path.join(dest_dir, m3u_name)
+    out_fname = os.path.join(dest_dir, self.m3u_name)
     m3u_in = M3UReader(source)
     m3u_out = M3UWriter(out_fname)
+    saf_out = None
+    if not copy_tree:
+      saf_fname = os.path.join(dest_dir, self.saf_name)
+      saf_out = SafWriter(saf_fname, self.audio_url)
     for item in m3u_in:
       i, path, title, duration = item
       source_dir, source_name = os.path.split(path)
@@ -333,7 +341,12 @@ class PlaylistManagerApp(wx.App):
       if dest_name:
         safe_title = self.normalizeTitle(title, MAX_ARTIST, 49)
         m3u_out.write(dest_name, safe_title, duration)
+        if saf_out:
+          saf_out.write(dest_name, safe_title, duration)
+    m3u_in.close()
     m3u_out.close()
+    if saf_out:
+      saf_out.close()
 
   def processDir(self, source, dest, copy_tree):
     base_dir = source
