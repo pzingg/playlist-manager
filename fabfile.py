@@ -7,9 +7,9 @@ from fabric.contrib.project import rsync_project
 
 # host_info is a callable that returns a dict of server information for a 
 # named host:
-#    'login'          - user to log in as
-#    'identity_file'  - private SSH key file
-#    'public_root'    - path on the host to the public html root
+#    'login'          - ssh user to log in as
+#    'identity_file'  - private ssh key file
+#    'ssh_root'       - path on the host to the public html root
 from servers import host_info
 
 # local_dir local directory, end with a slash, e.g. /playlist-manager/playlists/
@@ -26,7 +26,7 @@ def upload(local_dir, saf_url):
   identity_file = info['identity_file']
   
   # remote_dir, no slash, e.g. /var/www/public_html/playlists/grooves
-  remote_dir    = info['public_root'] + u.path
+  remote_dir    = info['ssh_root'] + u.path
   if remote_dir.endswith('/'):
     remote_dir = remote_dir[:-1]
   if not local_dir.endswith(os.path.sep):

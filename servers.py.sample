@@ -2,8 +2,10 @@
 
 HOST_TABLE = {
   'example.com': {
-    'public_root': '/path/to/public_html',
+    'ssh_root': '/ssh_path/to/public_html',
+    'ftp_root': '/ftp_path/to/public_html',
     'login': 'ssh_user',
+    'password': 'ftp_password',
     'identity_file': '/home/me/.ssh/id_dsa'
   }
 }

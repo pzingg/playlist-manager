@@ -11,13 +11,17 @@ from m3u import M3UReader, M3UWriter
 from saf import SafWriter
 from ConfigParser import SafeConfigParser
 
-# attempt at uploading
-try:
-  from fabric.tasks import execute as execute_task
-  import fabfile
-except:
-  pass
-
+USE_FABRIC = False
+if USE_FABRIC:
+  # attempt at uploading with Fabric
+  try:
+    from fabric.tasks import execute as execute_task
+    import fabfile
+  except:
+    pass
+else:
+  # attempt at uploading using ftputil
+  from ftpxfer import ftp_upload
 
 MAX_ARTIST = 21
 
@@ -231,11 +235,12 @@ class SettingsFrame():
 class PlaylistManagerApp(wx.App):
   '''Main application class'''
   def __init__(self):
-    wx.App.__init__(self)
     self.debug = False
     self.contents = ''
     self.m3u_name = 'playlist.m3u'
     self.saf_name = 'contentupdate.saf'
+    # triggers OnInit
+    wx.App.__init__(self)
 
   def OnInit(self):
     '''Sets everything up'''
@@ -246,6 +251,8 @@ class PlaylistManagerApp(wx.App):
     # set up the main frame of the app
     self.settingsFrame = SettingsFrame(self, None)
     self.loadSettings('global.ini')
+    print("last_settings %s" % self.last_settings)
+    print("debug %r" % self.debug)  
     self.settingsFrame.dlg.Show(True)
     return True
 
@@ -282,8 +289,10 @@ class PlaylistManagerApp(wx.App):
     # check that source file exists
     if not os.path.isfile(source_path):
       print("source file %s does not exist" % source_path)
+      print("self.debug %r" % self.debug)
       if not self.debug:
         return None
+    # clean file name
     basename, ext = os.path.splitext(source_name)
     dest_name = self.normalizeTitle(basename, MAX_ARTIST, 45) + ext
     rel_dir = dest_dir
@@ -321,10 +330,12 @@ class PlaylistManagerApp(wx.App):
     out_fname = os.path.join(dest_dir, self.m3u_name)
     m3u_in = M3UReader(source)
     m3u_out = M3UWriter(out_fname)
+    saf_fname = None
     saf_out = None
     if not copy_tree:
       saf_fname = os.path.join(dest_dir, self.saf_name)
       saf_out = SafWriter(saf_fname, audio_url)
+    print("m3u: %r, saf: %r" % (out_fname, saf_fname))
     for item in m3u_in:
       i, path, title, duration = item
       source_dir, source_name = os.path.split(path)
@@ -339,10 +350,13 @@ class PlaylistManagerApp(wx.App):
     if saf_out:
       saf_out.close()
     if audio_url:
-      try:
-        execute_task(fabfile.upload, dest_dir, audio_url)
-      except:
-        print("could not execute upload task: %s" % sys.exc_info()[0])
+      if USE_FABRIC:
+        try:
+          execute_task(fabfile.upload, dest_dir, audio_url)
+        except:
+          print("could not execute upload: %s" % sys.exc_info()[0])
+      else:
+        ftp_upload(dest_dir, audio_url)
 
   def processDir(self, source, dest, copy_tree):
     base_dir = source
@@ -383,8 +397,6 @@ class PlaylistManagerApp(wx.App):
     self.last_settings = getConfigOption(parser, 'global', 'last_settings')
     self.debug = getConfigOption(parser, 'global', 'debug', False, 'bool')
     print("settings loaded from %s" % fpath)
-    print("last_settings %s" % self.last_settings)
-    print("debug %r" % self.debug)
     return did_load
         
   def saveSettings(self, fname, global_ini=False):
