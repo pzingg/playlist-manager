@@ -35,3 +35,14 @@ installed.
 - https://github.com/fabric/fabric
 - http://docs.fabfile.org/en/1.4.0/installation.html
 - http://www.voidspace.org.uk/python/modules.shtml#pycrypto
+
+Requirements for Windows
+------------------------
+
+Here's what needs to be installed to get things working.
+
+- ActiveState Python 2.7
+- wxpython (prebuilt binaries)
+- PyCrypto (prebuilt binaries)
+- Fabric - pip install Fabric
+- Cygwin - rsync, openssh, libssh and dependencies
