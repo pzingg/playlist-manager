@@ -11,6 +11,14 @@ from m3u import M3UReader, M3UWriter
 from saf import SafWriter
 from ConfigParser import SafeConfigParser
 
+# attempt at uploading
+try:
+  from fabric.tasks import execute as execute_task
+  import fabfile
+except:
+  pass
+
+
 MAX_ARTIST = 21
 
 APP_DIR = sys.path[0]
@@ -128,9 +136,9 @@ class SettingsFrame():
     parser.set('destination', 'copy_method', copy_method)
     parser.set('destination', 'dest_path', self.getControl('destPath').GetValue())
     
-    parse.add_section('upload')
+    parser.add_section('upload')
     parser.set('upload', 'base_url', self.getControl('uploadBase').GetValue())
-    parser.get('upload', 'folder', self.getControl('uploadFolder').GetValue())
+    parser.set('upload', 'folder', self.getControl('uploadFolder').GetValue())
     return True
   
   def getControl(self, xmlid):
@@ -150,7 +158,7 @@ class SettingsFrame():
   # todo
   def onSaveSettings(self, e):
     fname = wx.FileSelector("Save settings as:", 
-      default_filename='global.ini', default_path=self.config_dir, 
+      default_filename='global.ini', default_path=self.app.config_dir, 
       wildcard="INI files (*.ini)|*.ini", flags=wx.FD_SAVE)
     if fname:
       self.app.saveSettings(fname)
@@ -231,11 +239,11 @@ class PlaylistManagerApp(wx.App):
 
   def OnInit(self):
     '''Sets everything up'''
+    self.SetAppName('Playlist Manager')
     self.config_dir = wx.StandardPaths.Get().GetUserDataDir()
     verifyDirectory(self.config_dir)
     
     # set up the main frame of the app
-    self.SetAppName('Playlist Manager')
     self.settingsFrame = SettingsFrame(self, None)
     self.loadSettings('global.ini')
     self.settingsFrame.dlg.Show(True)
@@ -330,6 +338,11 @@ class PlaylistManagerApp(wx.App):
     m3u_out.close()
     if saf_out:
       saf_out.close()
+    if audio_url:
+      try:
+        execute_task(fabfile.upload, dest_dir, audio_url)
+      except:
+        print("could not execute upload task: %s" % sys.exc_info()[0])
 
   def processDir(self, source, dest, copy_tree):
     base_dir = source
@@ -370,8 +383,8 @@ class PlaylistManagerApp(wx.App):
     self.last_settings = getConfigOption(parser, 'global', 'last_settings')
     self.debug = getConfigOption(parser, 'global', 'debug', False, 'bool')
     print("settings loaded from %s" % fpath)
-    print("last_settings %r" % self.last_settings)
-    print("debug %r, a %s" % (self.debug, type(self.debug)))
+    print("last_settings %s" % self.last_settings)
+    print("debug %r" % self.debug)
     return did_load
         
   def saveSettings(self, fname, global_ini=False):
@@ -379,7 +392,7 @@ class PlaylistManagerApp(wx.App):
     if global_ini:
       global_fname = os.path.join(APP_DIR, 'global.ini')
       print("global settings file %s" % global_fname)
-      f = fopen(global_fname, 'w')
+      f = open(global_fname, 'w')
     else:
       fname = os.path.realpath(os.path.join(self.config_dir, fname))
       print("user settings file %s" % fname)
@@ -388,9 +401,9 @@ class PlaylistManagerApp(wx.App):
       return False
     parser = SafeConfigParser()
     parser.add_section('global')
-    parser.set('global', 'debug', self.debug)
+    parser.set('global', 'debug', str(self.debug))
     parser.set('global', 'last_settings', fname)
-    did_save = self.settingsFrame.saveSettings(f, parser)
+    did_save = self.settingsFrame.saveSettings(parser)
     parser.write(f)
     f.close()
     if not did_save:

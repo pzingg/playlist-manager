@@ -1,0 +1,13 @@
+# example servers.py file
+
+HOST_TABLE = {
+  'example.com': {
+    'public_root': '/path/to/public_html',
+    'login': 'ssh_user',
+    'identity_file': '/home/me/.ssh/id_dsa'
+  }
+}
+
+# this is the named callable we export
+def host_info(hostname):
+  return HOST_TABLE.get(hostname)
